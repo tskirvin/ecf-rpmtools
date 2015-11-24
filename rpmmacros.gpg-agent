@@ -1,0 +1,88 @@
+# Update the packager name and copy this file as .rpmmacros in your home 
+# directory
+#
+# Custom RPM macros configuration file for building RPM packages
+# as a non-root user.
+#
+# Author:  Mike A. Harris <mharris@redhat.com>
+#
+# This is a copy of my own personal RPM configuration which I use
+# on my workstation for building and testing packages for Red Hat Linux.
+# There are many different possibilities on how to configure RPM, so
+# feel free to tweak however you desire.  Make sure to create any
+# directories that are referenced prior to using.  RPM will automatically
+# create some of them if missing, but not all of them.  Which ones it
+# auto-creates is only known by the extraterrestrial aliens that have
+# created RPM.
+#
+# For ANY help with anything related to RPM development, packaging,
+# or customization, please join the Red Hat RPM mailing list by sending
+# an email message to:  rpm-list-request@redhat.com  with the word
+# "subscribe" in the Subject: line.
+#
+# Any suggestions/comments/ for improvements to this setup appreciated.
+
+# %_topdir defines the top directory to be used for RPM building purposes
+# By default ROOT of the buildsystem
+%_topdir        %(mkdir -p $HOME/rpmbuild; echo $HOME/rpmbuild)
+
+# %_builddir is where source code tarballs are decompressed, and patches then
+# applied when building an RPM package
+%_builddir      %(mkdir -p %{_topdir}/BUILD; echo %{_topdir}/BUILD)
+
+# %_rpmdir is where binary RPM packages are put after being built.
+%_rpmdir        %(mkdir -p %{_topdir}/RPMS; echo %{_topdir}/RPMS)
+
+# %_srcrpmdir is where src.rpm packages are put after being built.
+%_srcrpmdir     %(mkdir -p %{_topdir}/SRPMS; echo %{_topdir}/SRPMS)
+
+# %_tmppath is where temporary scripts are placed during the RPM build
+# process as well as the %_buildroot where %install normally dumps files
+# prior to packaging up the final binary RPM's.
+%_tmppath       %(mkdir -p %{_topdir}/tmp; echo %{_topdir}/tmp)
+
+# %_sourcedir is where the source code tarballs, patches, etc. will be
+# placed after you do an "rpm -ivh somepackage.1.0-1.src.rpm"
+%_sourcedir   %(echo $PWD)
+
+# %_specdir is where the specfile gets placed when installing a src.rpm. I
+# prefer the specfile to be in the same directory as the source tarballs, etc.
+%_specdir     %{_sourcedir}
+
+# %_buildroot is where files get placed during the %install section of spec
+# file processing prior to final packaging into rpms.  This is oddly named
+# and probably should have been called "%_installroot" back when it was
+# initially added to RPM.  Alas, it was not.  ;o)
+%_buildroot   %{_topdir}/%{_tmppath}/%{name}-%{version}-root
+
+# %_rpmfilename defines the naming convention of the produced RPM packages,
+# and should not be modified.  It is listed here because I am overriding
+# RPM's default behaviour of dropping binary RPM's each in their own
+# separate subdirectories.  I hate that.  Grrr.
+%_rpmfilename %%{NAME}-%%{VERSION}-%%{RELEASE}.%%{ARCH}.rpm
+
+# Customized tags for local builds
+# %packager is the info that will appear in the "Packager:" field in the
+# RPM header on built packages.  By default I have it read your username
+# and hostname.  This should be customized appropriately.
+#%packager	%(echo ${USER}@)%(hostname)
+#%packager	Joe Blow <joeblow@stanford.edu>
+
+%packager     %(echo ${USER}@)fnal.gov
+%distribution Fermi National Accelerator Laboratory - ECF-SSI
+
+# GNU GPG config below
+%_signature   gpg
+%_gpg_name    ECF-SSI Signing Key <ecf-ssi@fnal.gov>
+%_gpg_path    ~/.gnupg
+
+## GPG-Agent support.  It'll still prompt, but you can skip through and
+## (if you're using gpg-agent) you can use a cached password.
+%__gpg_check_password_cmd /bin/true
+%__gpg_sign_cmd %{__gpg} gpg --batch --no-verbose --no-armor --use-agent --no-secmem-warning -u "%{_gpg_name}" -sbo %{__signature_filename} %{__plaintext_filename}
+
+# The following will try to create any missing directories required above
+# (Not implemented yet)
+
+# Don't build debug packages
+%debug_package    %{nil}

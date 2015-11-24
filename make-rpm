@@ -1,0 +1,68 @@
+#!/bin/bash
+
+## DESCRIPTION: Builds an rpm using the CMS Tier-1 RPM Makefile
+## AUTHOR:      Anthony Tiradani
+
+declare -r SCRIPT_NAME=$(basename "$BASH_SOURCE" .sh)
+
+function usage
+{
+    cat << EOF
+Usage: $SCRIPT_NAME [OPTION] <make target>
+
+OPTIONS:
+  -h    display this help and exit
+
+ARGUMENTS:
+  Make target to execute make against.  This argument is optional and
+  follows the rules of make.
+
+This is a wrapper script for make that will use the USCMS Tier-1 standard make
+file located at /usr/libexec/cms-rpmtools/Makefile to build rpms.  It is
+expected that Makefile.local is included in the top level directory of the
+source.  Additionally, an rpm spec file must also be present at the top level
+sirectory.
+
+To build an rpm from source change directory to the top level directory and
+execute $SCRIPT_NAME.
+
+Example:
+    cd <source directory>
+    make build-slf6-noarch
+
+    If all goes well, an rpm will be placed in ~/rpmbuild/slf6-x86_64.
+
+In order for the build process to complete without errors, create a
+symbolic link in your home directory name .rpmmacros that points to
+/usr/libexec/cms-rpmtools/rpmmacros
+
+Example:
+    ln -s /usr/libexec/cms-rpmtools/rpmmacros ~/.rpmmacros
+
+EOF
+}
+
+function check_args
+{
+    while getopts "h" OPTION; do
+        case $OPTION in
+            h)
+                usage
+                exit 1
+                ;;
+            ?)
+                usage
+                exit 2
+                ;;
+        esac
+    done
+}
+
+function main
+{
+    check_args $@
+    make --makefile=/usr/libexec/cms-rpmtools/Makefile $@
+}
+
+main $@
+
