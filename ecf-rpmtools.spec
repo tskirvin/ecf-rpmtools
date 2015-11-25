@@ -1,7 +1,7 @@
 Name:           ecf-rpmtools
 Group:          System Environment/Libraries
 Version:        1.0.0
-Release:        0%{?dist}
+Release:        0
 Summary:        ECF RPM Tools
 URL:            https://ecf-git.fnal.gov/ecf-rpmtools
 
