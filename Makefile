@@ -117,24 +117,24 @@ rpm-7-nosign: build-slf7
 #########################################################################
 
 tar: $(FILES) $(FILES_LOCAL)
-	tar --exclude '.git' --exclude '*.tar*' --exclude '*.sw*' \
+	@tar --exclude '.git' --exclude '*.tar*' --exclude '*.sw*' \
 		--exclude '.gitignore' $(TAR_EXCLUDE) \
 		-czpf $(PACKAGE)-$(VERS)-$(REL).tar.gz $(FILES_LOCAL)
 
 tar5: tar
-    if [[ "$(REL)" != "$(REL5)" ]]; then \
-	    cp $(PACKAGE)-$(VERS)-$(REL).tar.gz $(PACKAGE)-$(VERS)-$(REL5).tar.gz \
-    fi
+	@if [[ "$(REL)" != "$(REL5)" ]]; then \
+	    cp $(PACKAGE)-$(VERS)-$(REL).tar.gz $(PACKAGE)-$(VERS)-$(REL5).tar.gz ; \
+	fi
 
 tar6: tar
-    if [[ "$(REL)" != "$(REL6)" ]]; then \
-	    cp $(PACKAGE)-$(VERS)-$(REL).tar.gz $(PACKAGE)-$(VERS)-$(REL6).tar.gz \
-    fi
+	@if [[ "$(REL)" != "$(REL6)" ]]; then \
+	    cp $(PACKAGE)-$(VERS)-$(REL).tar.gz $(PACKAGE)-$(VERS)-$(REL6).tar.gz ; \
+	fi
 
 tar7: tar
-    if [[ "$(REL)" != "$(REL7)" ]]; then \
-	    cp $(PACKAGE)-$(VERS)-$(REL).tar.gz $(PACKAGE)-$(VERS)-$(REL7).tar.gz \
-    fi
+	@if [[ "$(REL)" != "$(REL7)" ]]; then \
+	    cp $(PACKAGE)-$(VERS)-$(REL).tar.gz $(PACKAGE)-$(VERS)-$(REL7).tar.gz ; \
+	fi
 
 #########################################################################
 ### SRPMs ###############################################################
@@ -142,21 +142,21 @@ tar7: tar
 
 srpm5: tar5
 	@echo "Creating SLF5 SRPM..."
-	mock -r slf5-x86_64 -D 'dist .el5' \
+	@mock -r slf5-x86_64 -D 'dist .el5' \
 		--spec=$(PWD)/$(SPEC_FILE) --sources=$(PWD) \
 		--resultdir=$(RPMDIR)/SRPMS \
 		--buildsrpm
 
 srpm6: tar6
 	@echo "Creating SLF6 SRPM..."
-	mock -r slf6-x86_64 -D 'dist .el6' \
+	@mock -r slf6-x86_64 -D 'dist .el6' \
 		--spec=$(PWD)/$(SPEC_FILE) --sources=$(PWD) \
 		--resultdir=$(RPMDIR)/SRPMS \
 		--buildsrpm
 
 srpm7: tar7
 	@echo "Creating SLF7 SRPM..."
-	mock -r slf7-x86_64 -D 'dist .el7' \
+	@mock -r slf7-x86_64 -D 'dist .el7' \
 		--spec=$(PWD)/$(SPEC_FILE) --sources=$(PWD) \
 		--resultdir=$(RPMDIR)/SRPMS \
 		--buildsrpm
@@ -234,7 +234,7 @@ build-slf7-noarch-local: srpm7
 
 copy-slf5: copy-slf5-x86_64 copy-slf5-noarch
 copy-slf6: copy-slf6-x86_64 copy-slf6-noarch
-copy-slf7: copy-slf6-x86_64 copy-slf6-noarch
+copy-slf7: copy-slf7-x86_64 copy-slf7-noarch
 
 copy-slf5-x86_64: confirm-slf5-x86_64
 	@if [[ $(ARCH) == 'x86_64' ]]; then \
@@ -308,14 +308,14 @@ confirm-slf7: confirm-slf7-x86_64 confirm-slf7-noarch
 confirm-slf5-x86_64:
 	@if [[ $(ARCH) == 'x86_64' ]]; then \
 		echo "rpm -qpi $(RPMDIR)/slf5-x86_64/$(RPM_BASE_5).*86*rpm" ; \
-		rpm -qpi $(RPMDIR)/slf-5-x86_64/$(RPM_BASE_5).*86*rpm \
+		rpm -qpi $(RPMDIR)/slf5-x86_64/$(RPM_BASE_5).*86*rpm \
 			2>&1 | egrep ^Signature | grep $(SIGN_KEY) ; \
 	fi
 
 confirm-slf5-noarch:
 	@if [[ $(ARCH) == 'noarch' ]]; then \
 		echo "rpm -qpi $(RPMDIR)/slf5-x86_64/$(RPM_BASE_5).noarch.rpm" ; \
-		rpm -qpi $(RPMDIR)/slf-5-x86_64/$(RPM_BASE_5).noarch.rpm \
+		rpm -qpi $(RPMDIR)/slf5-x86_64/$(RPM_BASE_5).noarch.rpm \
 			2>&1 | egrep ^Signature | grep $(SIGN_KEY) ; \
 	fi
 
@@ -357,15 +357,15 @@ sign-slf7: sign-slf7-x86_64 sign-slf7-noarch
 
 sign-slf5-x86_64:
 	@if [[ $(ARCH) == 'x86_64' ]]; then \
-		echo "rpm --resign $(RPMDIR)/slf-5-x86_64/$(RPM_BASE_5).*86*rpm" ; \
-		rpm --resign $(RPMDIR)/slf-5-x86_64/$(RPM_BASE_5).*86*rpm \
+		echo "rpm --resign $(RPMDIR)/slf5-x86_64/$(RPM_BASE_5).*86*rpm" ; \
+		rpm --resign $(RPMDIR)/slf5-x86_64/$(RPM_BASE_5).*86*rpm \
 			2>&1 | grep -v "input reopened" ; \
 	fi
 
 sign-slf5-noarch:
 	@if [[ $(ARCH) == 'noarch' ]]; then \
-		echo "rpm --resign $(RPMDIR)/slf-5-x86_64/$(RPM_BASE_5).noarch.rpm" ; \
-		rpm --resign $(RPMDIR)/slf-5-x86_64/$(RPM_BASE_5).noarch.rpm \
+		echo "rpm --resign $(RPMDIR)/slf5-x86_64/$(RPM_BASE_5).noarch.rpm" ; \
+		rpm --resign $(RPMDIR)/slf5-x86_64/$(RPM_BASE_5).noarch.rpm \
 			2>&1 | grep -v "input reopened" ; \
 	fi
 
@@ -414,7 +414,8 @@ linti:
 #########################################################################
 ### Deploy ##############################################################
 #########################################################################
-## Run the Makefile on the 
+## Run the Makefile on the upstream host to deploy the RPMs into the main 
+## yum repository.
 
 deploy-5:
 	$(DEPLOY_MAKE) 5

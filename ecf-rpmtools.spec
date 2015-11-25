@@ -1,9 +1,9 @@
 Name:           ecf-rpmtools
 Group:          System Environment/Libraries
-Version:        1.0.0
+Version:        1.0.1
 Release:        1%{?dist}
 Summary:        ECF RPM Tools
-URL:            https://ecf-git.fnal.gov/ecf-rpmtools
+URL:            https://github.com/tskirvin/ecf-rpmtools
 
 License:        Fermitools Software Legal Information (Modified BSD License)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -50,5 +50,13 @@ install -m 0644 rpmmacros.gpg-agent $RPM_BUILD_ROOT%{_libexecdir}/ecf-rpmtools
 %attr(-, root, root) %{_libexecdir}/ecf-rpmtools/rpmmacros.gpg-agent
 
 %changelog
+* Wed Nov 25 2015  Tim Skirvin <tskirvin@fnal.gov>      1.0.1-1
+- Makefile.local touch-ups
+
+* Wed Nov 25 2015  Tim Skirvin <tskirvin@fnal.gov>      1.0.1-0
+- tuning the Makefile to be a little bit quieter
+- the 'tar5', 'tar6', and 'tar7' targets work
+- general bug fixes around slf7 and slf5 targets
+
 * Wed Nov 25 2015  Tim Skirvin <tskirvin@fnal.gov>      1.0.0-1
 - initial version, forked from cms-rpmtools
