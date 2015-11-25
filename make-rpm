@@ -18,7 +18,7 @@ ARGUMENTS:
   follows the rules of make.
 
 This is a wrapper script for make that will use the USCMS Tier-1 standard make
-file located at /usr/libexec/cms-rpmtools/Makefile to build rpms.  It is
+file located at /usr/libexec/ecf-rpmtools/Makefile to build rpms.  It is
 expected that Makefile.local is included in the top level directory of the
 source.  Additionally, an rpm spec file must also be present at the top level
 sirectory.
@@ -34,10 +34,10 @@ Example:
 
 In order for the build process to complete without errors, create a
 symbolic link in your home directory name .rpmmacros that points to
-/usr/libexec/cms-rpmtools/rpmmacros
+/usr/libexec/ecf-rpmtools/rpmmacros
 
 Example:
-    ln -s /usr/libexec/cms-rpmtools/rpmmacros ~/.rpmmacros
+    ln -s /usr/libexec/ecf-rpmtools/rpmmacros ~/.rpmmacros
 
 EOF
 }
@@ -61,7 +61,7 @@ function check_args
 function main
 {
     check_args $@
-    make --makefile=/usr/libexec/cms-rpmtools/Makefile $@
+    make --makefile=/usr/libexec/ecf-rpmtools/Makefile $@
 }
 
 main $@
