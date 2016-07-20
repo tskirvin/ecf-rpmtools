@@ -42,7 +42,7 @@
 SHELL = /bin/bash
 
 ## What is the name of the package, based on our current directory?
-NAME = $(shell pwd | tr '/' '\n' | tail -1)
+NAME = $(shell egrep '^Name' *spec | cut -d':' -f2 | tr -d ' ')
 
 ## Build Architecture, Name, Package, etc
 ARCH    := $(shell egrep "^BuildArch" *.spec | cut -d':' -f2 | tr -d ' ')
@@ -236,7 +236,7 @@ copy-slf5: copy-slf5-x86_64 copy-slf5-noarch
 copy-slf6: copy-slf6-x86_64 copy-slf6-noarch
 copy-slf7: copy-slf7-x86_64 copy-slf7-noarch
 
-copy-slf5-x86_64: confirm-slf5-x86_64
+copy-slf5-x86_64:
 	@if [[ $(ARCH) == 'x86_64' ]]; then \
 		for i in $(DEST_slf5_x86_64); do \
 			echo "scp $(RPMDIR)/slf5-x86_64/$(RPM_BASE_5).x86_64.rpm $$i" ; \
@@ -246,7 +246,7 @@ copy-slf5-x86_64: confirm-slf5-x86_64
 		done ; \
 	fi
 
-copy-slf5-noarch: confirm-slf5-noarch
+copy-slf5-noarch:
 	@if [[ $(ARCH) == 'noarch' ]]; then \
 		for i in $(DEST_slf5_noarch); do \
 			echo "scp $(RPMDIR)/slf5-x86_64/$(RPM_BASE_5).noarch.rpm $$i" ; \
@@ -357,15 +357,17 @@ sign-slf7: sign-slf7-x86_64 sign-slf7-noarch
 
 sign-slf5-x86_64:
 	@if [[ $(ARCH) == 'x86_64' ]]; then \
-		echo "rpm --resign $(RPMDIR)/slf5-x86_64/$(RPM_BASE_5).*86*rpm" ; \
-		rpm --resign $(RPMDIR)/slf5-x86_64/$(RPM_BASE_5).*86*rpm \
+		echo "rpm -D \"__gpg_sign_cmd `rpm -E %{__gpg_sign_cmd} | sed -e 's/--batch/--batch --force-v3-sigs/'`\" --resign $(RPMDIR)/slf5-x86_64/$(RPM_BASE_5).*86*rpm" ; \
+		rpm -D "__gpg_sign_cmd `rpm -E %{__gpg_sign_cmd} | sed -e 's/--batch/--batch --force-v3-sigs/'`" \
+		--resign $(RPMDIR)/slf5-x86_64/$(RPM_BASE_5).*86*rpm \
 			2>&1 | grep -v "input reopened" ; \
 	fi
 
 sign-slf5-noarch:
 	@if [[ $(ARCH) == 'noarch' ]]; then \
-		echo "rpm --resign $(RPMDIR)/slf5-x86_64/$(RPM_BASE_5).noarch.rpm" ; \
-		rpm --resign $(RPMDIR)/slf5-x86_64/$(RPM_BASE_5).noarch.rpm \
+		echo "rpm -D \"__gpg_sign_cmd `rpm -E %{__gpg_sign_cmd} | sed -e 's/--batch/--batch --force-v3-sigs/'`\" --resign $(RPMDIR)/slf5-x86_64/$(RPM_BASE_5).noarch.rpm" ; \
+		rpm -D "__gpg_sign_cmd `rpm -E %{__gpg_sign_cmd} | sed -e 's/--batch/--batch --force-v3-sigs/'`" \
+		--resign $(RPMDIR)/slf5-x86_64/$(RPM_BASE_5).noarch.rpm \
 			2>&1 | grep -v "input reopened" ; \
 	fi
 
