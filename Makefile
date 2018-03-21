@@ -81,7 +81,7 @@ SIGN_KEY = 47ae212ea9934bb1
 SPEC_FILE := $(shell echo *.spec)
 
 ## Where do our RPMs go when we're done?
-DEST = root@rexadmin1.fnal.gov:/var/www/html/yum-managed/RPMS
+DEST = root@ssi-rpm.fnal.gov:/var/www/html/ssi/yum-managed/RPMS
 DEST_slf5_noarch = $(DEST)/noarch/5.x
 DEST_slf5_x86_64 = $(DEST)/x86_64/5.x
 DEST_slf6_noarch = $(DEST)/noarch/6.x
@@ -89,7 +89,7 @@ DEST_slf6_x86_64 = $(DEST)/x86_64/6.x
 DEST_slf7_noarch = $(DEST)/noarch/7.x
 DEST_slf7_x86_64 = $(DEST)/x86_64/7.x
 
-DEPLOY_MAKE = ssh root@rexadmin1 make -f /var/www/html/yum-managed/Makefile
+DEPLOY_MAKE = ssh root@ssi-rpm.fnal.gov make -f /var/www/html/ssi/yum-managed/Makefile
 
 ## What files to track?  Will decide whether we need to re-build the .tar
 FILES =  Makefile.local $(PACKAGE).spec
