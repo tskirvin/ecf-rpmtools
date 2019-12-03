@@ -1,6 +1,6 @@
 Name:           ecf-rpmtools
 Group:          System Environment/Libraries
-Version:        1.0.2
+Version:        1.0.3
 Release:        0%{?dist}
 Summary:        ECF RPM Tools
 URL:            https://github.com/tskirvin/ecf-rpmtools
@@ -50,6 +50,9 @@ install -m 0644 rpmmacros.gpg-agent $RPM_BUILD_ROOT%{_libexecdir}/ecf-rpmtools
 %attr(-, root, root) %{_libexecdir}/ecf-rpmtools/rpmmacros.gpg-agent
 
 %changelog
+* Tue Dec  3 2019  Tim Skirvin <tskirvin@fnal.gov>      1.0.3-0
+- adding CentOS 8 support
+
 * Fri Feb  5 2016  Tim Skirvin <tskirvin@fnal.gov>      1.0.2-0
 - SLF5 no longer requires that RPMs be signed before confirming
 - SLF5 tries to sign RPMs with '--force-v3-sigs' (not that it works)
