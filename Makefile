@@ -102,10 +102,10 @@ FILES =  Makefile.local $(PACKAGE).spec
 ## Include local configuration
 -include Makefile.local
 
-MOCK5 := mock -r slf5-x86_64 --uniqueext=$(USER) --resultdir $(RPMDIR)/slf5-x86_64
-MOCK6 := mock -r slf6-x86_64 --uniqueext=$(USER) --resultdir $(RPMDIR)/slf6-x86_64
-MOCK7 := mock -r slf7-x86_64 --uniqueext=$(USER) --resultdir $(RPMDIR)/slf7-x86_64
-MOCK8 := mock -r centos8-x86_64 --uniqueext=$(USER) --resultdir $(RPMDIR)/centos8-x86_64
+MOCK5 := mock -r slf5-x86_64 --uniqueext=$(USER) --resultdir $(RPMDIR)/slf5-x86_64 -D 'dist .el5'
+MOCK6 := mock -r slf6-x86_64 --uniqueext=$(USER) --resultdir $(RPMDIR)/slf6-x86_64 -D 'dist .el6'
+MOCK7 := mock -r slf7-x86_64 --uniqueext=$(USER) --resultdir $(RPMDIR)/slf7-x86_64 -D 'dist .el7'
+MOCK8 := mock -r centos8-x86_64 --uniqueext=$(USER) --resultdir $(RPMDIR)/centos8-x86_64 -D 'dist .el8' --disable-plugin=package_state
 
 #########################################################################
 ### main () #############################################################
@@ -197,8 +197,8 @@ build-slf7-noarch: build-slf7-noarch-local
 build-slf7-x86_64: build-slf7-x86_64-local
 
 build-centos8: build-centos8-x86_64 build-centos8-noarch
-build-centos8-noarch: build-centos8-noarch-local
-build-centos8-x86_64: build-centos8-x86_64-local
+build-centos8-noarch: srpm8 build-centos8-noarch-local
+build-centos8-x86_64: srpm8 build-centos8-x86_64-local
 
 build-nomock: tar
 	rpmbuild -ba *spec
@@ -215,7 +215,7 @@ build-mock-verbose-slf7: srpm7
 	$(MOCK7) -D 'dist .el7' --arch noarch $(SRPM7) -v
 	$(MOCK7) clean
 
-build-mock-verbose-slf8: srpm8
+build-mock-verbose-centos8: srpm8
 	$(MOCK8) -D 'dist .el8' --arch noarch $(SRPM8) -v
 	$(MOCK8) clean
 
@@ -255,17 +255,18 @@ build-slf7-noarch-local: srpm7
 		$(MOCK7) clean ; \
 	fi
 
-build-centos8-x86_64-local: srpm8
+build-centos8-x86_64-local:
 	@if [[ $(ARCH) == 'x86_64' ]]; then \
-		$(MOCK8) -D 'dist .el8' --arch x86_64 $(SRPM8) ; \
-		$(MOCK8) clean ; \
+		$(MOCK8) --arch x86_64 $(SRPM8) ; \
 	fi
 
-build-centos8-noarch-local: srpm8
+build-centos8-noarch-local:
 	@if [[ $(ARCH) == 'noarch' ]]; then \
-		$(MOCK8) -D 'dist .el8' --arch noarch $(SRPM8) ; \
-		$(MOCK8) clean ; \
+		$(MOCK8) --arch noarch $(SRPM8) ; \
 	fi
+
+mock8-clean:
+	$(MOCK8) clean
 
 #########################################################################
 ### Per-Architecture Copying ############################################
