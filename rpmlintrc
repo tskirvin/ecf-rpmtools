@@ -1,0 +1,7 @@
+# This is for internal use, so the license is internal too.
+addFilter ("^ecf-rpmtools.noarch:.*invalid-license")
+
+# I should probably write some docs someday, but the Makefile is meant to 
+# be self-documenting.
+addFilter ("^ecf-rpmtools.noarch:.*no-documentation")
+addFilter ("^ecf-rpmtools.noarch:.*no-manual-page-for-binary")

@@ -56,8 +56,6 @@ RPMDIR = $(HOME)/rpmbuild
 
 ## Package version and release strings
 REL  :=  $(shell egrep ^Release *.spec | cut -d':' -f2 | tr -d ' ' | sed s/\%\{\?dist\}/.el${RHL}/)
-REL5 :=  $(shell egrep ^Release *.spec | cut -d':' -f2 | tr -d ' ' | sed s/\%\{\?dist\}/.el5/)
-REL6 :=  $(shell egrep ^Release *.spec | cut -d':' -f2 | tr -d ' ' | sed s/\%\{\?dist\}/.el6/)
 REL7 :=  $(shell egrep ^Release *.spec | cut -d':' -f2 | tr -d ' ' | sed s/\%\{\?dist\}/.el7/)
 REL8 :=  $(shell egrep ^Release *.spec | cut -d':' -f2 | tr -d ' ' | sed s/\%\{\?dist\}/.el8/)
 RELx :=  $(shell egrep ^Release *.spec | cut -d':' -f2 | tr -d ' ' | sed s/\%\{\?dist\}//)
@@ -65,15 +63,11 @@ VERS :=  $(shell egrep ^Version *.spec | cut -d':' -f2 | tr -d ' ')
 
 # The location of the SRPMs
 SRPM :=  $(shell echo "${RPMDIR}/SRPMS/$(NAME)-$(VERS)-$(REL).src.rpm")
-SRPM5 :=  $(shell echo "${RPMDIR}/SRPMS/$(NAME)-$(VERS)-$(REL5).src.rpm")
-SRPM6 :=  $(shell echo "${RPMDIR}/SRPMS/$(NAME)-$(VERS)-$(REL6).src.rpm")
 SRPM7 :=  $(shell echo "${RPMDIR}/SRPMS/$(NAME)-$(VERS)-$(REL7).src.rpm")
 SRPM8 :=  $(shell echo "${RPMDIR}/SRPMS/$(NAME)-$(VERS)-$(REL8).src.rpm")
 
 ## The final name of the RPM that's being generated
 RPM_BASE = $(NAME)-$(VERS)-$(REL)
-RPM_BASE_5 = $(NAME)-$(VERS)-$(REL5)
-RPM_BASE_6 = $(NAME)-$(VERS)-$(REL6)
 RPM_BASE_7 = $(NAME)-$(VERS)-$(REL7)
 RPM_BASE_8 = $(NAME)-$(VERS)-$(REL8)
 RPM      = $(RPM_BASE).$(ARCH).rpm
@@ -85,10 +79,6 @@ SPEC_FILE := $(shell echo *.spec)
 
 ## Where do our RPMs go when we're done?
 DEST = root@ssi-rpm.fnal.gov:/var/www/html/ssi/yum-managed/RPMS
-DEST_slf5_noarch = $(DEST)/noarch/5.x
-DEST_slf5_x86_64 = $(DEST)/x86_64/5.x
-DEST_slf6_noarch = $(DEST)/noarch/6.x
-DEST_slf6_x86_64 = $(DEST)/x86_64/6.x
 DEST_slf7_noarch = $(DEST)/noarch/7.x
 DEST_slf7_x86_64 = $(DEST)/x86_64/7.x
 DEST_centos8_noarch = $(DEST)/noarch/8.x
@@ -102,8 +92,6 @@ FILES =  Makefile.local $(PACKAGE).spec
 ## Include local configuration
 -include Makefile.local
 
-MOCK5 := mock -r slf5-x86_64 --uniqueext=$(USER) --resultdir $(RPMDIR)/slf5-x86_64 -D 'dist .el5'
-MOCK6 := mock -r slf6-x86_64 --uniqueext=$(USER) --resultdir $(RPMDIR)/slf6-x86_64 -D 'dist .el6'
 MOCK7 := mock -r slf7-x86_64 --uniqueext=$(USER) --resultdir $(RPMDIR)/slf7-x86_64 -D 'dist .el7'
 MOCK8 := mock -r centos8-x86_64 --uniqueext=$(USER) --resultdir $(RPMDIR)/centos8-x86_64 -D 'dist .el8' --disable-plugin=package_state
 
@@ -111,11 +99,9 @@ MOCK8 := mock -r centos8-x86_64 --uniqueext=$(USER) --resultdir $(RPMDIR)/centos
 ### main () #############################################################
 #########################################################################
 
-rpm:          rpm-6-nosign rpm-7-nosign rpm-sign
-rpm-nosign:   rpm-6-nosign rpm-7-nosign
+rpm:          rpm-7-nosign rpm-8-nosign rpm-sign
+rpm-nosign:   rpm-7-nosign rpm-8-nosign
 
-rpm-5-nosign: build-slf5 
-rpm-6-nosign: build-slf6
 rpm-7-nosign: build-slf7
 rpm-8-nosign: build-centos8
 
@@ -127,16 +113,6 @@ tar: $(FILES) $(FILES_LOCAL)
 	@tar --exclude '.git' --exclude '*.tar*' --exclude '*.sw*' \
 		--exclude '.gitignore' $(TAR_EXCLUDE) \
 		-czpf $(PACKAGE)-$(VERS)-$(REL).tar.gz $(FILES_LOCAL)
-
-tar5: tar
-	@if [[ "$(REL)" != "$(REL5)" ]]; then \
-	    cp $(PACKAGE)-$(VERS)-$(REL).tar.gz $(PACKAGE)-$(VERS)-$(REL5).tar.gz ; \
-	fi
-
-tar6: tar
-	@if [[ "$(REL)" != "$(REL6)" ]]; then \
-	    cp $(PACKAGE)-$(VERS)-$(REL).tar.gz $(PACKAGE)-$(VERS)-$(REL6).tar.gz ; \
-	fi
 
 tar7: tar
 	@if [[ "$(REL)" != "$(REL7)" ]]; then \
@@ -151,20 +127,6 @@ tar8: tar
 #########################################################################
 ### SRPMs ###############################################################
 #########################################################################
-
-srpm5: tar5
-	@echo "Creating SLF5 SRPM..."
-	@mock -r slf5-x86_64 -D 'dist .el5' \
-		--spec=$(PWD)/$(SPEC_FILE) --sources=$(PWD) \
-		--resultdir=$(RPMDIR)/SRPMS \
-		--buildsrpm
-
-srpm6: tar6
-	@echo "Creating SLF6 SRPM..."
-	@mock -r slf6-x86_64 -D 'dist .el6' \
-		--spec=$(PWD)/$(SPEC_FILE) --sources=$(PWD) \
-		--resultdir=$(RPMDIR)/SRPMS \
-		--buildsrpm
 
 srpm7: tar7
 	@echo "Creating SLF7 SRPM..."
@@ -184,14 +146,6 @@ srpm8: tar8
 ### Per-Architecture Builds #############################################
 #########################################################################
 
-build-slf5: build-slf5-x86_64 build-slf5-noarch
-build-slf5-noarch: build-slf5-noarch-local
-build-slf5-x86_64: build-slf5-x86_64-local
-
-build-slf6: build-slf6-x86_64 build-slf6-noarch
-build-slf6-noarch: build-slf6-noarch-local
-build-slf6-x86_64: build-slf6-x86_64-local
-
 build-slf7: build-slf7-x86_64 build-slf7-noarch
 build-slf7-noarch: build-slf7-noarch-local
 build-slf7-x86_64: build-slf7-x86_64-local
@@ -203,14 +157,6 @@ build-centos8-x86_64: srpm8 build-centos8-x86_64-local
 build-nomock: tar
 	rpmbuild -ba *spec
 
-build-mock-verbose-slf5: srpm5
-	$(MOCK5) -D 'dist .el5' --arch noarch $(SRPM5) -v
-	$(MOCK5) clean
-
-build-mock-verbose-slf6: srpm6
-	$(MOCK6) -D 'dist .el6' --arch noarch $(SRPM6) -v
-	$(MOCK6) clean
-
 build-mock-verbose-slf7: srpm7
 	$(MOCK7) -D 'dist .el7' --arch noarch $(SRPM7) -v
 	$(MOCK7) clean
@@ -218,30 +164,6 @@ build-mock-verbose-slf7: srpm7
 build-mock-verbose-centos8: srpm8
 	$(MOCK8) -D 'dist .el8' --arch noarch $(SRPM8) -v
 	$(MOCK8) clean
-
-build-slf5-x86_64-local: srpm5
-	@if [[ $(ARCH) == 'x86_64' ]]; then \
-		$(MOCK5) -D 'dist .el5' --arch x86_64 $(SRPM5) ; \
-		$(MOCK5) clean ; \
-	fi
-
-build-slf5-noarch-local: srpm5
-	@if [[ $(ARCH) == 'noarch' ]]; then \
-		$(MOCK5) -D 'dist .el5' --arch noarch $(SRPM5) ; \
-		$(MOCK5) clean ; \
-	fi
-
-build-slf6-x86_64-local: srpm6
-	@if [[ $(ARCH) == 'x86_64' ]]; then \
-		$(MOCK6) -D 'dist .el6' --arch x86_64 $(SRPM6) ; \
-		$(MOCK6) clean ; \
-	fi
-
-build-slf6-noarch-local: srpm6
-	@if [[ $(ARCH) == 'noarch' ]]; then \
-		$(MOCK6) -D 'dist .el6' --arch noarch $(SRPM6) ; \
-		$(MOCK6) clean ; \
-	fi
 
 build-slf7-x86_64-local: srpm7
 	@if [[ $(ARCH) == 'x86_64' ]]; then \
@@ -272,51 +194,8 @@ mock8-clean:
 ### Per-Architecture Copying ############################################
 #########################################################################
 
-copy-slf5: copy-slf5-x86_64 copy-slf5-noarch
-copy-slf6: copy-slf6-x86_64 copy-slf6-noarch
 copy-slf7: copy-slf7-x86_64 copy-slf7-noarch
 copy-centos8: copy-centos8-x86_64 copy-centos8-noarch
-
-copy-slf5-x86_64:
-	@if [[ $(ARCH) == 'x86_64' ]]; then \
-		for i in $(DEST_slf5_x86_64); do \
-			echo "scp $(RPMDIR)/slf5-x86_64/$(RPM_BASE_5).x86_64.rpm $$i" ; \
-			echo "Press enter to continue..."; \
-			read ; \
-			scp $(RPMDIR)/slf5-x86_64/$(RPM_BASE_5).x86_64.rpm $$i ; \
-		done ; \
-	fi
-
-copy-slf5-noarch:
-	@if [[ $(ARCH) == 'noarch' ]]; then \
-		for i in $(DEST_slf5_noarch); do \
-			echo "scp $(RPMDIR)/slf5-x86_64/$(RPM_BASE_5).noarch.rpm $$i" ; \
-			echo "Press enter to continue..."; \
-			read ; \
-			scp $(RPMDIR)/slf5-x86_64/$(RPM_BASE_5).noarch.rpm $$i ; \
-		done ; \
-	fi
-
-copy-slf6-x86_64: confirm-slf6-x86_64
-	@if [[ $(ARCH) == 'x86_64' ]]; then \
-		for i in $(DEST_slf6_x86_64); do \
-			echo "scp $(RPMDIR)/slf6-x86_64/$(RPM_BASE_6).x86_64.rpm $$i" ; \
-			echo "Press enter to continue..."; \
-			read ; \
-			scp $(RPMDIR)/slf6-x86_64/$(RPM_BASE_6).x86_64.rpm $$i ; \
-		done ; \
-	fi
-
-
-copy-slf6-noarch: confirm-slf6-noarch
-	@if [[ $(ARCH) == 'noarch' ]]; then \
-		for i in $(DEST_slf6_noarch); do \
-			echo "scp $(RPMDIR)/slf6-x86_64/$(RPM_BASE_6).noarch.rpm $$i" ; \
-			echo "Press enter to continue..."; \
-			read ; \
-			scp $(RPMDIR)/slf6-x86_64/$(RPM_BASE_6).noarch.rpm $$i ; \
-		done ; \
-	fi
 
 copy-slf7-x86_64: confirm-slf7-x86_64
 	@if [[ $(ARCH) == 'x86_64' ]]; then \
@@ -362,38 +241,8 @@ copy-centos8-noarch: confirm-centos8-noarch
 ### Per-Architecture RPM Confirmation ###################################
 #########################################################################
 
-confirm-slf5: confirm-slf5-x86_64 confirm-slf5-noarch
-confirm-slf6: confirm-slf6-x86_64 confirm-slf6-noarch
 confirm-slf7: confirm-slf7-x86_64 confirm-slf7-noarch
 confirm-centos8: confirm-centos8-x86_64 confirm-centos8-noarch
-
-confirm-slf5-x86_64:
-	@if [[ $(ARCH) == 'x86_64' ]]; then \
-		echo "rpm -qpi $(RPMDIR)/slf5-x86_64/$(RPM_BASE_5).*86*rpm" ; \
-		rpm -qpi $(RPMDIR)/slf5-x86_64/$(RPM_BASE_5).*86*rpm \
-			2>&1 | egrep ^Signature | grep $(SIGN_KEY) ; \
-	fi
-
-confirm-slf5-noarch:
-	@if [[ $(ARCH) == 'noarch' ]]; then \
-		echo "rpm -qpi $(RPMDIR)/slf5-x86_64/$(RPM_BASE_5).noarch.rpm" ; \
-		rpm -qpi $(RPMDIR)/slf5-x86_64/$(RPM_BASE_5).noarch.rpm \
-			2>&1 | egrep ^Signature | grep $(SIGN_KEY) ; \
-	fi
-
-confirm-slf6-x86_64:
-	@if [[ $(ARCH) == 'x86_64' ]]; then \
-		echo "rpm -qpi $(RPMDIR)/slf6-x86_64/$(RPM_BASE_6).*86*rpm" ; \
-		rpm -qpi $(RPMDIR)/slf6-x86_64/$(RPM_BASE_6).*86*rpm \
-			2>&1 | egrep ^Signature | grep $(SIGN_KEY) ; \
-	fi
-
-confirm-slf6-noarch:
-	@if [[ $(ARCH) == 'noarch' ]]; then \
-		echo "rpm -qpi $(RPMDIR)/slf6-x86_64/$(RPM_BASE_6).noarch.rpm" ; \
-		rpm -qpi $(RPMDIR)/slf6-x86_64/$(RPM_BASE_6).noarch.rpm \
-			2>&1 | egrep ^Signature | grep $(SIGN_KEY) ; \
-	fi
 
 confirm-slf7-x86_64:
 	@if [[ $(ARCH) == 'x86_64' ]]; then \
@@ -427,40 +276,8 @@ confirm-centos8-noarch:
 ### Per-Architecture RPM Signing ########################################
 #########################################################################
 
-sign-slf5: sign-slf5-x86_64 sign-slf5-noarch
-sign-slf6: sign-slf6-x86_64 sign-slf6-noarch
 sign-slf7: sign-slf7-x86_64 sign-slf7-noarch
 sign-centos8: sign-centos8-x86_64 sign-centos8-noarch
-
-sign-slf5-x86_64:
-	@if [[ $(ARCH) == 'x86_64' ]]; then \
-		echo "rpm -D \"__gpg_sign_cmd `rpm -E %{__gpg_sign_cmd} | sed -e 's/--batch/--batch --force-v3-sigs/'`\" --resign $(RPMDIR)/slf5-x86_64/$(RPM_BASE_5).*86*rpm" ; \
-		rpm -D "__gpg_sign_cmd `rpm -E %{__gpg_sign_cmd} | sed -e 's/--batch/--batch --force-v3-sigs/'`" \
-		--resign $(RPMDIR)/slf5-x86_64/$(RPM_BASE_5).*86*rpm \
-			2>&1 | grep -v "input reopened" ; \
-	fi
-
-sign-slf5-noarch:
-	@if [[ $(ARCH) == 'noarch' ]]; then \
-		echo "rpm -D \"__gpg_sign_cmd `rpm -E %{__gpg_sign_cmd} | sed -e 's/--batch/--batch --force-v3-sigs/'`\" --resign $(RPMDIR)/slf5-x86_64/$(RPM_BASE_5).noarch.rpm" ; \
-		rpm -D "__gpg_sign_cmd `rpm -E %{__gpg_sign_cmd} | sed -e 's/--batch/--batch --force-v3-sigs/'`" \
-		--resign $(RPMDIR)/slf5-x86_64/$(RPM_BASE_5).noarch.rpm \
-			2>&1 | grep -v "input reopened" ; \
-	fi
-
-sign-slf6-x86_64:
-	@if [[ $(ARCH) == 'x86_64' ]]; then \
-		echo "rpm --resign $(RPMDIR)/slf6-x86_64/$(RPM_BASE_6).*86*rpm" ; \
-		rpm --resign $(RPMDIR)/slf6-x86_64/$(RPM_BASE_6).*86*rpm \
-			2>&1 | grep -v "input reopened" ; \
-	fi
-
-sign-slf6-noarch:
-	@if [[ $(ARCH) == 'noarch' ]]; then \
-		echo "rpm --resign $(RPMDIR)/slf6-x86_64/$(RPM_BASE_6).noarch.rpm" ; \
-		rpm --resign $(RPMDIR)/slf6-x86_64/$(RPM_BASE_6).noarch.rpm \
-			2>&1 | grep -v "input reopened" ; \
-	fi
 
 sign-slf7-x86_64:
 	@if [[ $(ARCH) == 'x86_64' ]]; then \
@@ -494,28 +311,23 @@ sign-centos8-noarch:
 #########################################################################
 ### rpmlint #############################################################
 #########################################################################
-## Verify that the RPMs match the standard 'rpmlint' checks.
+## Verify that the RPMs match the standard 'rpmlint' checks.  rpmlintrc
+## is a file with local rpmlint exemptions.
 
 lint:
 	find $(RPMDIR) -name "$(NAME)-$(VERS)-$(RELx).*.rpm" \
-		! -name '*src.rpm*' | xargs rpmlint
+		! -name '*src.rpm*' | xargs rpmlint -f rpmlintrc
 
 # Add warnings to the lint output
 linti:
 	find $(RPMDIR) -name "$(NAME)-$(VERS)-$(RELx).*.rpm" \
-		! -name '*src.rpm*' | xargs rpmlint -i
+		! -name '*src.rpm*' | xargs rpmlint -i -f rpmlintrc
 
 #########################################################################
 ### Deploy ##############################################################
 #########################################################################
 ## Run the Makefile on the upstream host to deploy the RPMs into the main 
 ## yum repository.
-
-deploy-5:
-	$(DEPLOY_MAKE) 5
-
-deploy-6:
-	$(DEPLOY_MAKE) 6
 
 deploy-7:
 	$(DEPLOY_MAKE) 7
