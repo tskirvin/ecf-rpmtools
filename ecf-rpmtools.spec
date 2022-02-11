@@ -1,6 +1,6 @@
 Name:           ecf-rpmtools
 Group:          System Environment/Libraries
-Version:        1.0.4
+Version:        1.0.5
 Release:        1%{?dist}
 Summary:        ECF RPM Tools
 URL:            https://github.com/tskirvin/ecf-rpmtools
@@ -50,6 +50,9 @@ install -m 0644 rpmmacros.gpg-agent $RPM_BUILD_ROOT%{_libexecdir}/ecf-rpmtools
 %attr(-, root, root) %{_libexecdir}/ecf-rpmtools/rpmmacros.gpg-agent
 
 %changelog
+* Fri Feb 11 2022  Tim Skirvin <tskirvin@fnal.gov>      1.0.5-1
+- CentOS Stream 9 Support (and presumably RHEL9)
+
 * Thu Dec 17 2020  Tim Skirvin <tskirvin@fnal.gov>      1.0.4-1
 - dropping SLF6 + SLF6 support for real this time
 
