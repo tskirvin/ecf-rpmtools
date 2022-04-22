@@ -99,7 +99,7 @@ FILES =  Makefile.local $(PACKAGE).spec
 
 MOCK7 := mock -r slf7-x86_64 --uniqueext=$(USER) --resultdir $(RPMDIR)/slf7-x86_64 -D 'dist .el7'
 MOCK8 := mock -r centos8-x86_64 --uniqueext=$(USER) --resultdir $(RPMDIR)/centos8-x86_64 -D 'dist .el8' --disable-plugin=package_state
-MOCK9 := mock -r centos-stream-9-x86_64 --uniqueext=$(USER) --resultdir $(RPMDIR)/cs9-x86_64 -D 'dist .el9' --disable-plugin=package_state
+MOCK9 := mock -r centos-stream-9-x86_64 --uniqueext=$(USER) --resultdir $(RPMDIR)/cs9-x86_64 -D 'dist .el9'
 
 #########################################################################
 ### main () #############################################################
@@ -189,8 +189,8 @@ build-mock-verbose-centos8: srpm8
 	$(MOCK8) clean
 
 build-mock-verbose-cs9: srpm9
-	$(MOCK8) -D 'dist .el9' --arch noarch $(SRPM8) -v
-	$(MOCK8) clean
+	$(MOCK9) -D 'dist .el9' --arch noarch $(SRPM9) -v
+	$(MOCK9) clean
 
 build-slf7-x86_64-local: srpm7
 	@if [[ $(ARCH) == 'x86_64' ]]; then \
