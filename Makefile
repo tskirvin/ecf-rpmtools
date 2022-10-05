@@ -76,7 +76,7 @@ RPM_BASE_9 = $(NAME)-$(VERS)-$(REL9)
 RPM      = $(RPM_BASE).$(ARCH).rpm
 
 ## What is our signing key ID?
-SIGN_KEY = 47ae212ea9934bb1
+SIGN_KEY = 602df50e15142ea3
 
 SPEC_FILE := $(shell echo *.spec)
 
