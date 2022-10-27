@@ -69,11 +69,11 @@
 #%packager	Joe Blow <joeblow@stanford.edu>
 
 %packager     %(echo ${USER}@)fnal.gov
-%distribution Fermi National Accelerator Laboratory - ECF-SSI
+%distribution Fermi National Accelerator Laboratory - SCF-SSI
 
 # GNU GPG config below
 %_signature   gpg
-%_gpg_name    ECF-SSI Signing Key <ecf-ssi@fnal.gov>
+%_gpg_name    SCF-SSI (RPM Signing Key) <ecf-ssi@fnal.gov>
 %_gpg_path    ~/.gnupg
 
 ## GPG-Agent support.  It'll still prompt, but you can skip through and

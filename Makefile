@@ -84,10 +84,10 @@ SPEC_FILE := $(shell echo *.spec)
 DEST = root@ssi-rpm.fnal.gov:/var/www/html/ssi/yum-managed/RPMS
 DEST_slf7_noarch = $(DEST)/noarch/7.x
 DEST_slf7_x86_64 = $(DEST)/x86_64/7.x
-DEST_centos8_noarch = $(DEST)/noarch/8.x
-DEST_centos8_x86_64 = $(DEST)/x86_64/8.x
-DEST_cs9_noarch = $(DEST)/noarch/9.x
-DEST_cs9_x86_64 = $(DEST)/x86_64/9.x
+DEST_el8_noarch = $(DEST)/noarch/8.x
+DEST_el8_x86_64 = $(DEST)/x86_64/8.x
+DEST_el9_noarch = $(DEST)/noarch/9.x
+DEST_el9_x86_64 = $(DEST)/x86_64/9.x
 
 DEPLOY_MAKE = ssh root@ssi-rpm.fnal.gov make -f /var/www/html/ssi/yum-managed/Makefile
 
@@ -98,8 +98,8 @@ FILES =  Makefile.local $(PACKAGE).spec
 -include Makefile.local
 
 MOCK7 := mock -r slf7-x86_64 --uniqueext=$(USER) --resultdir $(RPMDIR)/slf7-x86_64 -D 'dist .el7'
-MOCK8 := mock -r centos8-x86_64 --uniqueext=$(USER) --resultdir $(RPMDIR)/centos8-x86_64 -D 'dist .el8' --disable-plugin=package_state
-MOCK9 := mock -r centos-stream-9-x86_64 --uniqueext=$(USER) --resultdir $(RPMDIR)/cs9-x86_64 -D 'dist .el9'
+MOCK8 := mock -r centos8-x86_64 --uniqueext=$(USER) --resultdir $(RPMDIR)/el8-x86_64 -D 'dist .el8' --disable-plugin=package_state
+MOCK9 := mock -r centos-stream-9-x86_64 --uniqueext=$(USER) --resultdir $(RPMDIR)/el9-x86_64 -D 'dist .el9'
 
 #########################################################################
 ### main () #############################################################
@@ -109,8 +109,8 @@ rpm:          rpm-7-nosign rpm-8-nosign rpm-9-nosign rpm-sign
 rpm-nosign:   rpm-7-nosign rpm-8-nosign rpm-9-nosign
 
 rpm-7-nosign: build-slf7
-rpm-8-nosign: build-centos8
-rpm-9-nosign: build-cs9
+rpm-8-nosign: build-el8
+rpm-9-nosign: build-el9
 
 #########################################################################
 ## .tar Files ###########################################################
@@ -169,13 +169,13 @@ build-slf7: build-slf7-x86_64 build-slf7-noarch
 build-slf7-noarch: build-slf7-noarch-local
 build-slf7-x86_64: build-slf7-x86_64-local
 
-build-centos8: build-centos8-x86_64 build-centos8-noarch
-build-centos8-noarch: srpm8 build-centos8-noarch-local
-build-centos8-x86_64: srpm8 build-centos8-x86_64-local
+build-el8: build-el8-x86_64 build-el8-noarch
+build-el8-noarch: srpm8 build-el8-noarch-local
+build-el8-x86_64: srpm8 build-el8-x86_64-local
 
-build-cs9: build-cs9-x86_64 build-cs9-noarch
-build-cs9-noarch: srpm9 build-cs9-noarch-local
-build-cs9-x86_64: srpm9 build-cs9-x86_64-local
+build-el9: build-el9-x86_64 build-el9-noarch
+build-el9-noarch: srpm9 build-el9-noarch-local
+build-el9-x86_64: srpm9 build-el9-x86_64-local
 
 build-nomock: tar
 	rpmbuild -ba *spec
@@ -184,11 +184,11 @@ build-mock-verbose-slf7: srpm7
 	$(MOCK7) -D 'dist .el7' --arch noarch $(SRPM7) -v
 	$(MOCK7) clean
 
-build-mock-verbose-centos8: srpm8
+build-mock-verbose-el8: srpm8
 	$(MOCK8) -D 'dist .el8' --arch noarch $(SRPM8) -v
 	$(MOCK8) clean
 
-build-mock-verbose-cs9: srpm9
+build-mock-verbose-el9: srpm9
 	$(MOCK9) -D 'dist .el9' --arch noarch $(SRPM9) -v
 	$(MOCK9) clean
 
@@ -204,22 +204,22 @@ build-slf7-noarch-local: srpm7
 		$(MOCK7) clean ; \
 	fi
 
-build-centos8-x86_64-local:
+build-el8-x86_64-local:
 	@if [[ $(ARCH) == 'x86_64' ]]; then \
 		$(MOCK8) --arch x86_64 $(SRPM8) ; \
 	fi
 
-build-centos8-noarch-local:
+build-el8-noarch-local:
 	@if [[ $(ARCH) == 'noarch' ]]; then \
 		$(MOCK8) --arch noarch $(SRPM8) ; \
 	fi
 
-build-cs9-x86_64-local:
+build-el9-x86_64-local:
 	@if [[ $(ARCH) == 'x86_64' ]]; then \
 		$(MOCK9) --arch x86_64 $(SRPM9) ; \
 	fi
 
-build-cs9-noarch-local:
+build-el9-noarch-local:
 	@if [[ $(ARCH) == 'noarch' ]]; then \
 		$(MOCK9) --arch noarch $(SRPM9) ; \
 	fi
@@ -238,8 +238,8 @@ mock9-clean:
 #########################################################################
 
 copy-slf7: copy-slf7-x86_64 copy-slf7-noarch
-copy-centos8: copy-centos8-x86_64 copy-centos8-noarch
-copy-cs9: copy-cs9-x86_64 copy-cs9-noarch
+copy-el8: copy-el8-x86_64 copy-el8-noarch
+copy-el9: copy-el9-x86_64 copy-el9-noarch
 
 copy-slf7-x86_64: confirm-slf7-x86_64
 	@if [[ $(ARCH) == 'x86_64' ]]; then \
@@ -261,43 +261,43 @@ copy-slf7-noarch: confirm-slf7-noarch
 		done ; \
 	fi
 
-copy-centos8-x86_64: confirm-centos8-x86_64
+copy-el8-x86_64: confirm-el8-x86_64
 	@if [[ $(ARCH) == 'x86_64' ]]; then \
-		for i in $(DEST_centos8_x86_64); do \
-			echo "scp $(RPMDIR)/centos8-x86_64/$(RPM_BASE_8).x86_64.rpm $$i" ; \
+		for i in $(DEST_el8_x86_64); do \
+			echo "scp $(RPMDIR)/el8-x86_64/$(RPM_BASE_8).x86_64.rpm $$i" ; \
 			echo "Press enter to continue..."; \
 			read ; \
-			scp $(RPMDIR)/centos8-x86_64/$(RPM_BASE_8).x86_64.rpm $$i ; \
+			scp $(RPMDIR)/el8-x86_64/$(RPM_BASE_8).x86_64.rpm $$i ; \
 		done ; \
 	fi
 
-copy-centos8-noarch: confirm-centos8-noarch
+copy-el8-noarch: confirm-el8-noarch
 	@if [[ $(ARCH) == 'noarch' ]]; then \
-		for i in $(DEST_centos8_noarch); do \
-			echo "scp $(RPMDIR)/centos8-x86_64/$(RPM_BASE_8).noarch.rpm $$i" ; \
+		for i in $(DEST_el8_noarch); do \
+			echo "scp $(RPMDIR)/el8-x86_64/$(RPM_BASE_8).noarch.rpm $$i" ; \
 			echo "Press enter to continue..."; \
 			read ; \
-			scp $(RPMDIR)/centos8-x86_64/$(RPM_BASE_8).noarch.rpm $$i ; \
+			scp $(RPMDIR)/el8-x86_64/$(RPM_BASE_8).noarch.rpm $$i ; \
 		done ; \
 	fi
 
-copy-cs9-x86_64: confirm-cs9-x86_64
+copy-el9-x86_64: confirm-el9-x86_64
 	@if [[ $(ARCH) == 'x86_64' ]]; then \
-		for i in $(DEST_cs9_x86_64); do \
-			echo "scp $(RPMDIR)/cs9-x86_64/$(RPM_BASE_9).x86_64.rpm $$i" ; \
+		for i in $(DEST_el9_x86_64); do \
+			echo "scp $(RPMDIR)/el9-x86_64/$(RPM_BASE_9).x86_64.rpm $$i" ; \
 			echo "Press enter to continue..."; \
 			read ; \
-			scp $(RPMDIR)/cs9-x86_64/$(RPM_BASE_9).x86_64.rpm $$i ; \
+			scp $(RPMDIR)/el9-x86_64/$(RPM_BASE_9).x86_64.rpm $$i ; \
 		done ; \
 	fi
 
-copy-cs9-noarch: confirm-cs9-noarch
+copy-el9-noarch: confirm-el9-noarch
 	@if [[ $(ARCH) == 'noarch' ]]; then \
-		for i in $(DEST_cs9_noarch); do \
-			echo "scp $(RPMDIR)/cs9-x86_64/$(RPM_BASE_9).noarch.rpm $$i" ; \
+		for i in $(DEST_el9_noarch); do \
+			echo "scp $(RPMDIR)/el9-x86_64/$(RPM_BASE_9).noarch.rpm $$i" ; \
 			echo "Press enter to continue..."; \
 			read ; \
-			scp $(RPMDIR)/cs9-x86_64/$(RPM_BASE_9).noarch.rpm $$i ; \
+			scp $(RPMDIR)/el9-x86_64/$(RPM_BASE_9).noarch.rpm $$i ; \
 		done ; \
 	fi
 
@@ -306,8 +306,8 @@ copy-cs9-noarch: confirm-cs9-noarch
 #########################################################################
 
 confirm-slf7: confirm-slf7-x86_64 confirm-slf7-noarch
-confirm-centos8: confirm-centos8-x86_64 confirm-centos8-noarch
-confirm-cs9: confirm-cs9-x86_64 confirm-cs9-noarch
+confirm-el8: confirm-el8-x86_64 confirm-el8-noarch
+confirm-el9: confirm-el9-x86_64 confirm-el9-noarch
 
 confirm-slf7-x86_64:
 	@if [[ $(ARCH) == 'x86_64' ]]; then \
@@ -323,31 +323,31 @@ confirm-slf7-noarch:
 			2>&1 | egrep ^Signature | grep $(SIGN_KEY) ; \
 	fi
 
-confirm-centos8-x86_64:
+confirm-el8-x86_64:
 	@if [[ $(ARCH) == 'x86_64' ]]; then \
-		echo "rpm -qpi $(RPMDIR)/centos8-x86_64/$(RPM_BASE_8).*86*rpm" ; \
-		rpm -qpi $(RPMDIR)/centos8-x86_64/$(RPM_BASE_8).*86*rpm \
+		echo "rpm -qpi $(RPMDIR)/el8-x86_64/$(RPM_BASE_8).*86*rpm" ; \
+		rpm -qpi $(RPMDIR)/el8-x86_64/$(RPM_BASE_8).*86*rpm \
 			2>&1 | egrep ^Signature | grep $(SIGN_KEY) ; \
 	fi
 
-confirm-centos8-noarch:
+confirm-el8-noarch:
 	@if [[ $(ARCH) == 'noarch' ]]; then \
-		echo "rpm -qpi $(RPMDIR)/centos8-x86_64/$(RPM_BASE_8).noarch.rpm" ; \
-		rpm -qpi $(RPMDIR)/centos8-x86_64/$(RPM_BASE_8).noarch.rpm \
+		echo "rpm -qpi $(RPMDIR)/el8-x86_64/$(RPM_BASE_8).noarch.rpm" ; \
+		rpm -qpi $(RPMDIR)/el8-x86_64/$(RPM_BASE_8).noarch.rpm \
 			2>&1 | egrep ^Signature | grep $(SIGN_KEY) ; \
 	fi
 
-confirm-cs9-x86_64:
+confirm-el9-x86_64:
 	@if [[ $(ARCH) == 'x86_64' ]]; then \
-		echo "rpm -qpi $(RPMDIR)/cs9-x86_64/$(RPM_BASE_9).*86*rpm" ; \
-		rpm -qpi $(RPMDIR)/cs9-x86_64/$(RPM_BASE_9).*86*rpm \
+		echo "rpm -qpi $(RPMDIR)/el9-x86_64/$(RPM_BASE_9).*86*rpm" ; \
+		rpm -qpi $(RPMDIR)/el9-x86_64/$(RPM_BASE_9).*86*rpm \
 			2>&1 | egrep ^Signature | grep $(SIGN_KEY) ; \
 	fi
 
-confirm-cs9-noarch:
+confirm-el9-noarch:
 	@if [[ $(ARCH) == 'noarch' ]]; then \
-		echo "rpm -qpi $(RPMDIR)/cs9-x86_64/$(RPM_BASE_9).noarch.rpm" ; \
-		rpm -qpi $(RPMDIR)/cs9-x86_64/$(RPM_BASE_9).noarch.rpm \
+		echo "rpm -qpi $(RPMDIR)/el9-x86_64/$(RPM_BASE_9).noarch.rpm" ; \
+		rpm -qpi $(RPMDIR)/el9-x86_64/$(RPM_BASE_9).noarch.rpm \
 			2>&1 | egrep ^Signature | grep $(SIGN_KEY) ; \
 	fi
 
@@ -356,8 +356,8 @@ confirm-cs9-noarch:
 #########################################################################
 
 sign-slf7: sign-slf7-x86_64 sign-slf7-noarch
-sign-centos8: sign-centos8-x86_64 sign-centos8-noarch
-sign-cs9: sign-cs9-x86_64 sign-cs9-noarch
+sign-el8: sign-el8-x86_64 sign-el8-noarch
+sign-el9: sign-el9-x86_64 sign-el9-noarch
 
 sign-slf7-x86_64:
 	@if [[ $(ARCH) == 'x86_64' ]]; then \
@@ -373,31 +373,31 @@ sign-slf7-noarch:
 			2>&1 | grep -v "input reopened" ; \
 	fi
 
-sign-centos8-x86_64:
+sign-el8-x86_64:
 	@if [[ $(ARCH) == 'x86_64' ]]; then \
-		echo "rpm --resign $(RPMDIR)/centos8-x86_64/$(RPM_BASE_8).*86*rpm" ; \
-		rpm --resign $(RPMDIR)/centos8-x86_64/$(RPM_BASE_8).*86*rpm \
+		echo "rpm --resign $(RPMDIR)/el8-x86_64/$(RPM_BASE_8).*86*rpm" ; \
+		rpm --resign $(RPMDIR)/el8-x86_64/$(RPM_BASE_8).*86*rpm \
 			2>&1 | grep -v "input reopened" ; \
 	fi
 
-sign-centos8-noarch:
+sign-el8-noarch:
 	@if [[ $(ARCH) == 'noarch' ]]; then \
-		echo "rpm --resign $(RPMDIR)/centos8-x86_64/$(RPM_BASE_8).noarch.rpm" ; \
-		rpm --resign $(RPMDIR)/centos8-x86_64/$(RPM_BASE_8).noarch.rpm \
+		echo "rpm --resign $(RPMDIR)/el8-x86_64/$(RPM_BASE_8).noarch.rpm" ; \
+		rpm --resign $(RPMDIR)/el8-x86_64/$(RPM_BASE_8).noarch.rpm \
 			2>&1 | grep -v "input reopened" ; \
 	fi
 
-sign-cs9-x86_64:
+sign-el9-x86_64:
 	@if [[ $(ARCH) == 'x86_64' ]]; then \
-		echo "rpm --resign $(RPMDIR)/cs9-x86_64/$(RPM_BASE_9).*86*rpm" ; \
-		rpm --resign $(RPMDIR)/cs9-x86_64/$(RPM_BASE_9).*86*rpm \
+		echo "rpm --resign $(RPMDIR)/el9-x86_64/$(RPM_BASE_9).*86*rpm" ; \
+		rpm --resign $(RPMDIR)/el9-x86_64/$(RPM_BASE_9).*86*rpm \
 			2>&1 | grep -v "input reopened" ; \
 	fi
 
-sign-cs9-noarch:
+sign-el9-noarch:
 	@if [[ $(ARCH) == 'noarch' ]]; then \
-		echo "rpm --resign $(RPMDIR)/cs9-x86_64/$(RPM_BASE_9).noarch.rpm" ; \
-		rpm --resign $(RPMDIR)/cs9-x86_64/$(RPM_BASE_9).noarch.rpm \
+		echo "rpm --resign $(RPMDIR)/el9-x86_64/$(RPM_BASE_9).noarch.rpm" ; \
+		rpm --resign $(RPMDIR)/el9-x86_64/$(RPM_BASE_9).noarch.rpm \
 			2>&1 | grep -v "input reopened" ; \
 	fi
 
